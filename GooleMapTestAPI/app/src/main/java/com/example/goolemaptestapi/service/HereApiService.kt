@@ -4,6 +4,7 @@ import com.example.goolemaptestapi.herenearby.HereNearBy
 import com.example.goolemaptestapi.herenearby.Item
 
 import android.content.Context
+import com.example.goolemaptestapi.R
 import com.google.android.gms.maps.model.LatLng
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -12,7 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 suspend fun fetchNearbyPlacesFromHere(place: LatLng, context: Context): Set<LatLng> {
-    val apiKey = // In this place write your (HERE API) key
+    val apiKey = context.getString(R.string.here_api_key)
     val at = "${place.latitude},${place.longitude}"
     val q = "restaurant"
 

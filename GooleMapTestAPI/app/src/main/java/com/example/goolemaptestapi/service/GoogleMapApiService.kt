@@ -105,7 +105,7 @@ interface GoogleMapApiService
         fun getInstance() : GoogleMapApiService {
             if (googleMapApiService == null) {
                 googleMapApiService = Retrofit.Builder().baseUrl("https://maps.googleapis.com").addConverterFactory(
-//                googleMapApiService = Retrofit.Builder().baseUrl("https://places.googleapis.com").addConverterFactory( // this baseurl is for "searchNearbyPlaces"
+//                googleMapApiService = Retrofit.Builder().baseUrl("https://places.googleapis.com").addConverterFactory(
                     GsonConverterFactory.create()).build().create(GoogleMapApiService::class.java)
             }
             return googleMapApiService!!

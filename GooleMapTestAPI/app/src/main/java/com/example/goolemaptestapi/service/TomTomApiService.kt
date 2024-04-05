@@ -22,7 +22,7 @@ import retrofit2.http.Query
 
 
 suspend fun fetchPlacesAlongRoot(points: List<LatLng>, context: Context): List<LatLng> {
-    val apiKey = // In this place write your (TOMTOM API) key
+    val apiKey = context.getString(R.string.tom_tom_key)
     val maxDetourTime = 2000
     val limit = 20
 
