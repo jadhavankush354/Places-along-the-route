@@ -12,7 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 suspend fun fetchNearbyPlacesFromHere(place: LatLng, context: Context): Set<LatLng> {
-    val apiKey = "uqP0OH5y37uA-Cq-hCoY_t9k_-CCXEn5a5kSsIGuhwI"
+    val apiKey = // In this place write your (HERE API) key
     val at = "${place.latitude},${place.longitude}"
     val q = "restaurant"
 
