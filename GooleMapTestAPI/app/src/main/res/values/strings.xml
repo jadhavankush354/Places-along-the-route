@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GooleMapTestAPI</string>
+<!--    <string name="google_maps_api_key">AIzaSyDZNi73MTMdYIUcnm-WdhtcGYyVMg46Aw8</string> Abhisarika mam -->
+    <string name="google_maps_api_key">AIzaSyCVyhKQPBTVEzW-TCetVeOVsJvbCTUSlz4</string>  Ranjit
+<!--    <string name="google_maps_api_key">AIzaSyAkT5Pmg7UUmDzCBff8JMLD2KZmYQZBaK4</string>  Ankush -->
+<!--    <string name="google_maps_api_key">oVpKzM0jnWoCDvhArQWAdwGPzKZKgdF2</string>  Mjilani-->
+</resources>
