@@ -10,10 +10,10 @@ Places Along the Route: Find places of interest along a specified route.
 Integration with APIs: Utilizes TOMTOM, Google Maps, and HERE APIs for location services.
 Technologies Used
 Kotlin: The app is developed using Kotlin programming language.
-Compose UI: UI components are built using Jetpack Compose, the modern toolkit for building native Android UI.
-TOMTOM API: Used for location-based services including geocoding, routing, and searching nearby places.
-Google Maps API: Provides map functionality and services such as displaying maps, adding markers, and calculating routes.
-HERE API: Utilized for mapping, geocoding, and searching for nearby places.
+Compose UI: UI components are built using Jetpack Compose, the modern toolkit for building Android UI.
+TOMTOM API: Used for location-based services for searching nearby places.
+Google Maps API: Provides map functionality and services such as displaying maps.
+HERE API: Utilized for searching for nearby places.
 Installation
 To run the places-along-the-route app on your device or emulator, follow these steps:
 
@@ -21,7 +21,7 @@ Clone the repository:
 
 bash
 Copy code
-git clone https://github.com/yourusername/places-along-the-route.git
+git clone https://github.com/jadhavankush354/Places-along-the-route.git
 
 
 Open the project in Android Studio.
@@ -37,8 +37,6 @@ Upon launching the app, users can choose to discover nearby places or find place
 Users can input their current location or choose a location on the map to search for nearby places.
 For finding places along a route, users need to input the starting and ending points of the route, and the app will display relevant places along the route.
 Credits
-places-along-the-route app is developed by [Your Name] and is inspired by the need for convenient location-based services.
+places-along-the-route app is developed by Ankush Jadhav and is inspired by the need for convenient location-based services.
 
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
