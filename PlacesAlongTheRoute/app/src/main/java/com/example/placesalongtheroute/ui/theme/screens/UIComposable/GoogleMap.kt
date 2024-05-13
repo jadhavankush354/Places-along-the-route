@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.placesalongtheroute.entityClasses.herenearby.Item
 import com.example.placesalongtheroute.entityClasses.nearbyplaces.Place
 import com.example.placesalongtheroute.models.ViewModel
+import com.example.placesalongtheroute.service.fetchNearbyPlacesFromHere
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -20,6 +21,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.model.DirectionsResult
 import kotlinx.coroutines.delay
 
 @Composable
@@ -28,16 +30,20 @@ fun GoogleMapView(viewModel: ViewModel) {
     var currentLocation by remember { mutableStateOf(LatLng(20.5937, 78.9629)) }
     var nearByPlaces by remember { mutableStateOf(emptyList<Place>()) }
     var nearByPlacesAlongRoute by remember { mutableStateOf(emptyList<Item>()) }
-    var allRoutePoints by remember { mutableStateOf(emptyList<List<LatLng>>()) }
-    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.currentLocation, 10f) }
+    var directionsResult by remember { mutableStateOf(DirectionsResult()) }
+    var allRoutes by remember { mutableStateOf<List<List<LatLng>>>(emptyList()) }
+    var currentRoute by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
+    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.currentLocation, 10f) }
     LaunchedEffect(Unit) {
         while (true) {
             findDirection = viewModel.findDirection
             currentLocation = viewModel.currentLocation
             nearByPlaces = viewModel.nearByPlaces
             nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute
-            allRoutePoints = viewModel.allRoutePoints
+            directionsResult = viewModel.directionsResult
+            allRoutes = viewModel.allRoutes
+            currentRoute = viewModel.currentRoute
             delay(1000)
         }
     }
@@ -62,10 +68,8 @@ fun GoogleMapView(viewModel: ViewModel) {
                 }
             }
         }
-
-        if (allRoutePoints.isNotEmpty()){
-            allRoutePoints.forEach { routePoint ->
-
+        if (allRoutes.isNotEmpty()){
+            allRoutes.forEach { routePoint ->
                 if (routePoint.isNotEmpty()) {
                     Marker(
                         state = MarkerState(position = routePoint.first()),
@@ -75,8 +79,10 @@ fun GoogleMapView(viewModel: ViewModel) {
                     Polyline(
                         points = routePoint,
                         color = Color.Red,
-                        width = 5f,
-                        onClick = { /* Handle polyline click event if needed */ }
+                        width = 20f,
+                        onClick = {
+                            Log.d("debug", "Clicked the polyline")
+                        }
                     )
                     Marker(
                         state = MarkerState(position = routePoint.last()),
@@ -84,61 +90,25 @@ fun GoogleMapView(viewModel: ViewModel) {
                         snippet = "Address Not Available"
                     )
                 }
+                if (currentRoute.isNullOrEmpty()) {
+                    Marker(
+                        state = MarkerState(position = currentRoute.first()),
+                        title = "unknows",
+                        snippet = "Address Not Available"
+                    )
+                    Polyline(
+                        points = currentRoute,
+                        color = Color.Blue,
+                        width = 20f,
+                        onClick = { /* Handle polyline click event if needed */ }
+                    )
+                    Marker(
+                        state = MarkerState(position = currentRoute.last()),
+                        title = "unknows",
+                        snippet = "Address Not Available"
+                    )
+                }
             }
-//            if (allRoutePoints[0].isNotEmpty()) {
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints.first().first()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//                Polyline(
-//                    points = allRoutePoints[0],
-//                    color = Color.Red,
-//                    width = 5f,
-//                    onClick = { /* Handle polyline click event if needed */ }
-//                )
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints[0].last()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//            }
-//            if (allRoutePoints[1].isNotEmpty()) {
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints[1].first()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//                Polyline(
-//                    points = allRoutePoints[1],
-//                    color = Color.Red,
-//                    width = 5f,
-//                    onClick = { /* Handle polyline click event if needed */ }
-//                )
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints[1].last()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//            }
-//            if (allRoutePoints[2].isNotEmpty()) {
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints[2].first()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//                Polyline(
-//                    points = allRoutePoints[2],
-//                    color = Color.Red,
-//                    width = 5f,
-//                    onClick = { /* Handle polyline click event if needed */ }
-//                )
-//                Marker(
-//                    state = MarkerState(position = allRoutePoints[2].last()),
-//                    title = "unknows",
-//                    snippet = "Address Not Available"
-//                )
-//            }
         }
         if (nearByPlacesAlongRoute.isNotEmpty()) {
             nearByPlacesAlongRoute.forEach { place ->
