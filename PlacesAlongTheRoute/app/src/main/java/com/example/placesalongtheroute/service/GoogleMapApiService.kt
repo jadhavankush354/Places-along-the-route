@@ -52,55 +52,15 @@ suspend fun fetchNearbyPlaces(place: LatLng, viewModel: ViewModel): List<Place> 
     }
 }
 
-//suspend fun fetchDirection(origin: String, destination: String, viewModel: ViewModel): List<List<LatLng>> {
-//    val apiKey = viewModel.getContext().getString(R.string.google_maps_api_key)
-//    val googleMapApiService = GoogleMapApiService.getInstance()
-////    val routePoints = mutableListOf<LatLng>()
-//    val allRoutePoints = mutableListOf<List<LatLng>>()
-//    try {
-//        val response = googleMapApiService.getRoutingPoints(origin, destination,true, apiKey)
-//        if (response.isSuccessful) {
-//            val directionResponse: DirectionsResult? = response.body()
-//            directionResponse?.routes?.forEach { route ->
-//                val routePoints = mutableListOf<LatLng>()
-//                route.legs.forEach { leg ->
-//                    leg.steps.forEach { step ->
-//                        val points = step.polyline.decodePath()
-//                        routePoints.addAll(points.map { LatLng(it.lat, it.lng) })
-//                    }
-//                }
-//                allRoutePoints.add(routePoints)
-//            }
-//        } else {
-//            Log.e("debug", "API request failed: ${response.code()}")
-//        }
-//    } catch (e: HttpException) {
-//        Log.e("debug", "HTTP Exception: ${e.message()}")
-//    } catch (e: Throwable) {
-//        Log.e("debug", "Error: ${e.message}")
-//    }
-//    return allRoutePoints
-//}
  suspend fun fetchDirection(origin: String, destination: String, viewModel: ViewModel): DirectionsResult {
     val apiKey = viewModel.getContext().getString(R.string.google_maps_api_key)
     val googleMapApiService = GoogleMapApiService.getInstance()
-//    val routePoints = mutableListOf<LatLng>()
     var allRoutePoints : DirectionsResult = DirectionsResult()
     try {
         val response = googleMapApiService.getRoutingPoints(origin, destination,true, apiKey)
         if (response.isSuccessful) {
             val directionResponse: DirectionsResult? = response.body()
             allRoutePoints = directionResponse ?: DirectionsResult()
-//            directionResponse?.routes?.forEach { route ->
-//                val routePoints = mutableListOf<LatLng>()
-//                route.legs.forEach { leg ->
-//                    leg.steps.forEach { step ->
-//                        val points = step.polyline.decodePath()
-//                        routePoints.addAll(points.map { LatLng(it.lat, it.lng) })
-//                    }
-//                }
-//                allRoutePoints.add(routePoints)
-//            }
         } else {
             Log.e("debug", "API request failed: ${response.code()}")
         }

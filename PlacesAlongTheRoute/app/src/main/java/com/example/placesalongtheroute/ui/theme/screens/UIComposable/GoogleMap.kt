@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.placesalongtheroute.entityClasses.herenearby.Item
@@ -22,8 +23,11 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.model.DirectionsResult
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
 
+@OptIn(FlowPreview::class)
 @Composable
 fun GoogleMapView(viewModel: ViewModel) {
     var findDirection by remember { mutableStateOf(false) }
@@ -34,7 +38,8 @@ fun GoogleMapView(viewModel: ViewModel) {
     var allRoutes by remember { mutableStateOf<List<List<LatLng>>>(emptyList()) }
     var currentRoute by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
-    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.currentLocation, 10f) }
+    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.mapView, 10f) }
+
     LaunchedEffect(Unit) {
         while (true) {
             findDirection = viewModel.findDirection
@@ -43,8 +48,13 @@ fun GoogleMapView(viewModel: ViewModel) {
             nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute
             directionsResult = viewModel.directionsResult
             allRoutes = viewModel.allRoutes
+            if (currentRoute.isNotEmpty() && currentRoute != viewModel.currentRoute) {
+                val newCameraPosition = CameraPosition.fromLatLngZoom(currentRoute[currentRoute.size / 2], 10f)
+                cameraPositionState.position = newCameraPosition // Update camera position state
+                viewModel.mapView = currentRoute[currentRoute.size/2]
+            }
             currentRoute = viewModel.currentRoute
-            delay(1000)
+            delay(100)
         }
     }
     GoogleMap(
@@ -80,7 +90,9 @@ fun GoogleMapView(viewModel: ViewModel) {
                         points = routePoint,
                         color = Color.Red,
                         width = 20f,
+                        clickable = true,
                         onClick = {
+                            viewModel.currentRoute = routePoint
                             Log.d("debug", "Clicked the polyline")
                         }
                     )
@@ -90,12 +102,26 @@ fun GoogleMapView(viewModel: ViewModel) {
                         snippet = "Address Not Available"
                     )
                 }
-                if (currentRoute.isNullOrEmpty()) {
+                if (currentRoute.isNotEmpty()) {
                     Marker(
                         state = MarkerState(position = currentRoute.first()),
                         title = "unknows",
                         snippet = "Address Not Available"
                     )
+                    var devide: Int = currentRoute.size / 10
+                    repeat(8) {
+                        if (it == 4) {
+                            Log.d("debug","fuck")
+//                            cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.mapView, 10f) }
+                        }
+                        Marker(
+                            state = MarkerState(position = currentRoute[devide]),
+                            title = "unknows",
+                            snippet = "Address Not Available"
+                        )
+                        devide += currentRoute.size / 10
+
+                    }
                     Polyline(
                         points = currentRoute,
                         color = Color.Blue,

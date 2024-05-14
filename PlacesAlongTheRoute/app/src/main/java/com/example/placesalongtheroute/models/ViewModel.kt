@@ -12,8 +12,8 @@ import com.google.maps.model.DirectionsResult
 
 class ViewModel(): ViewModel() {
     private lateinit var context: MainActivity
-    var allRoutes by  mutableStateOf<List<List<LatLng>>>(emptyList())
-    var currentRoute by  mutableStateOf<List<LatLng>>(emptyList())
+    var allRoutes by mutableStateOf<List<List<LatLng>>>(emptyList())
+    var currentRoute by mutableStateOf<List<LatLng>>(emptyList())
     var directionsResult by mutableStateOf(DirectionsResult())
     var findDirection by mutableStateOf(false)
     var placeType by mutableStateOf("")
@@ -21,9 +21,12 @@ class ViewModel(): ViewModel() {
     var nearByPlacesAlongRoute by mutableStateOf(emptyList<Item>())
     var findAlongTheRoute by mutableStateOf(false)
     var currentLocation by mutableStateOf(LatLng(20.5937, 78.9629))
+    var mapView by mutableStateOf(LatLng(20.5937, 78.9629))
 
     fun setContext(mainActivity: MainActivity) {
         context = mainActivity
     }
-    fun getContext() = context
+    fun getContext(): MainActivity {
+        return context
+    }
 }

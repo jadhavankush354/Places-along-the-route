@@ -30,7 +30,7 @@ fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: Image
     )
 
     val keyboardType = iconToKeyboardType.getOrElse(leadingIcon) { KeyboardType.Text }
-    var state by remember { mutableStateOf("") }
+    var state by remember { mutableStateOf("bangaluru") }
     OutlinedTextField(
         leadingIcon = {
             Icon(

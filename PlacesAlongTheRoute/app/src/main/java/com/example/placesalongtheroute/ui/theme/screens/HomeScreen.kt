@@ -27,43 +27,62 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.placesalongtheroute.R
+import com.example.placesalongtheroute.entityClasses.herenearby.Item
+import com.example.placesalongtheroute.entityClasses.nearbyplaces.Place
 import com.example.placesalongtheroute.models.ViewModel
 import com.example.placesalongtheroute.service.fetchDirection
 import com.example.placesalongtheroute.service.fetchNearbyPlacesFromHere
 import com.example.placesalongtheroute.ui.theme.screens.UIComposable.GoogleMapView
 import com.example.placesalongtheroute.ui.theme.screens.UIComposable.MyOutlinedTextField
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.model.DirectionsResult
 import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: ViewModel) {
-    var origin by remember { mutableStateOf("pune") }
-    var destination by remember { mutableStateOf("bangaluru") }
+    var origin by remember { mutableStateOf("") }
+    var destination by remember { mutableStateOf("") }
     var currentRoute by remember { mutableStateOf(emptyList<LatLng>()) }
 
     if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.findDirection) {
         LaunchedEffect(Unit) {
-            viewModel.directionsResult = fetchDirection(origin, destination, viewModel)
-            viewModel.directionsResult.routes.forEach { route ->
-                val routePoints = mutableListOf<List<LatLng>>()
-                route.legs.forEach { leg ->
-                    val legPoints = mutableListOf<LatLng>()
-                    leg.steps.forEach { step ->
-                        val points = step.polyline.decodePath()
-                        legPoints.addAll(points.map { LatLng(it.lat, it.lng) })
-                    }
-                    routePoints.add(legPoints)
-                }
-                viewModel.allRoutes = viewModel.allRoutes + routePoints
+            if (viewModel.findDirection == true) {
+                viewModel.allRoutes = emptyList()
+                viewModel.currentRoute = emptyList()
+                viewModel.directionsResult = DirectionsResult()
+                viewModel.placeType = ""
+                viewModel.nearByPlaces = emptyList()
+                viewModel.nearByPlacesAlongRoute = emptyList()
+                viewModel.findAlongTheRoute = false
+                viewModel.currentLocation = LatLng(20.5937, 78.9629)
+                viewModel.mapView = LatLng(20.5937, 78.9629)
             }
-            viewModel.currentRoute = viewModel.allRoutes[1]
-            currentRoute = viewModel.currentRoute
+            viewModel.directionsResult = fetchDirection(origin, destination, viewModel)
+            if (viewModel.directionsResult.routes.isNotEmpty()) {
+                viewModel.directionsResult.routes.forEach { route ->
+                    val routePoints = mutableListOf<List<LatLng>>()
+                    route.legs.forEach { leg ->
+                        val legPoints = mutableListOf<LatLng>()
+                        leg.steps.forEach { step ->
+                            val points = step.polyline.decodePath()
+                            legPoints.addAll(points.map { LatLng(it.lat, it.lng) })
+                        }
+                        routePoints.add(legPoints)
+                    }
+
+                    viewModel.allRoutes += routePoints
+                }
+                if (viewModel.allRoutes.isNotEmpty()) {
+                    viewModel.currentRoute = viewModel.allRoutes[0]
+                    currentRoute = viewModel.currentRoute
+                }
+            }
             viewModel.findDirection = false
         }
     }
 
-    if (origin.isNotEmpty() && destination.isNotEmpty() && !viewModel.currentRoute.isNullOrEmpty() && viewModel.findAlongTheRoute) {
+    if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty() && viewModel.findAlongTheRoute) {
         LaunchedEffect(Dispatchers.IO) {
             currentRoute.forEach { point ->
                 viewModel.nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute + fetchNearbyPlacesFromHere(point, viewModel)
@@ -93,13 +112,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             item {
                 Spacer(Modifier.width(10.dp))
                 ElevatedButton(
-                    onClick = { if (!viewModel.currentRoute.isNullOrEmpty()) {
+                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
                         viewModel.placeType = "Restaurant"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && !viewModel.currentRoute.isNullOrEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
                 ) {
                     Text(text = "Food")
                 }
@@ -107,13 +126,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (!viewModel.currentRoute.isNullOrEmpty()) {
+                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
                         viewModel.placeType = "Fuel"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && !viewModel.currentRoute.isNullOrEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
                 ) {
                     Text(text = "Fuel")
                 }
@@ -121,13 +140,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (!viewModel.currentRoute.isNullOrEmpty()) {
+                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
                         viewModel.placeType = "Tourism"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && !viewModel.currentRoute.isNullOrEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
                 ) {
                     Text(text = "Tourism")
                 }
@@ -135,13 +154,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (!viewModel.currentRoute.isNullOrEmpty()) {
+                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
                         viewModel.placeType = "Service"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && !viewModel.currentRoute.isNullOrEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
                 ) {
                     Text(text = "Service")
                 }

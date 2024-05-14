@@ -1,7 +1,5 @@
 package com.example.placesalongtheroute.service
 
-import android.content.Context
-import android.util.Log
 import com.example.placesalongtheroute.R
 import com.example.placesalongtheroute.entityClasses.herenearby.HereNearBy
 import com.example.placesalongtheroute.entityClasses.herenearby.Item
@@ -47,5 +45,3 @@ interface HereApiService
         }
     }
 }
-
-
