@@ -15,8 +15,10 @@ import com.example.placesalongtheroute.entityClasses.herenearby.Item
 import com.example.placesalongtheroute.entityClasses.nearbyplaces.Place
 import com.example.placesalongtheroute.models.ViewModel
 import com.example.placesalongtheroute.service.fetchNearbyPlacesFromHere
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
@@ -31,29 +33,34 @@ import kotlinx.coroutines.flow.debounce
 @Composable
 fun GoogleMapView(viewModel: ViewModel) {
     var findDirection by remember { mutableStateOf(false) }
+    var findNearByyPoints by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf(LatLng(20.5937, 78.9629)) }
     var nearByPlaces by remember { mutableStateOf(emptyList<Place>()) }
-    var nearByPlacesAlongRoute by remember { mutableStateOf(emptyList<Item>()) }
+//    var nearByPlacesAlongRoute by remember { mutableStateOf(emptyList<Item>()) }
     var directionsResult by remember { mutableStateOf(DirectionsResult()) }
-    var allRoutes by remember { mutableStateOf<List<List<LatLng>>>(emptyList()) }
-    var currentRoute by remember { mutableStateOf<List<LatLng>>(emptyList()) }
+    var currentLegPoints by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
-    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.mapView, 10f) }
+    var cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.mapView, 5f) }
 
     LaunchedEffect(Unit) {
         while (true) {
             findDirection = viewModel.findDirection
             currentLocation = viewModel.currentLocation
             nearByPlaces = viewModel.nearByPlaces
-            nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute
+//            nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute
             directionsResult = viewModel.directionsResult
-            allRoutes = viewModel.allRoutes
-            if (currentRoute.isNotEmpty() && currentRoute != viewModel.currentRoute) {
-                val newCameraPosition = CameraPosition.fromLatLngZoom(currentRoute[currentRoute.size / 2], 10f)
-                cameraPositionState.position = newCameraPosition // Update camera position state
-                viewModel.mapView = currentRoute[currentRoute.size/2]
+            if (currentLegPoints.isNotEmpty()) {
+                val newCameraPosition = CameraPosition.fromLatLngZoom(currentLegPoints[currentLegPoints.size / 2], 6f)
+                cameraPositionState.position  = newCameraPosition // Update camera position state
+                viewModel.mapView = currentLegPoints[currentLegPoints.size/2]
+                val builder = LatLngBounds.Builder()
+                currentLegPoints.forEach { point ->
+                    builder.include(point)
+                }
+                val bounds = builder.build()
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, 100), durationMs = 100)
             }
-            currentRoute = viewModel.currentRoute
+
             delay(100)
         }
     }
@@ -78,66 +85,54 @@ fun GoogleMapView(viewModel: ViewModel) {
                 }
             }
         }
-        if (allRoutes.isNotEmpty()){
-            allRoutes.forEach { routePoint ->
-                if (routePoint.isNotEmpty()) {
-                    Marker(
-                        state = MarkerState(position = routePoint.first()),
-                        title = "unknows",
-                        snippet = "Address Not Available"
-                    )
-                    Polyline(
-                        points = routePoint,
-                        color = Color.Red,
-                        width = 20f,
-                        clickable = true,
-                        onClick = {
-                            viewModel.currentRoute = routePoint
-                            Log.d("debug", "Clicked the polyline")
-                        }
-                    )
-                    Marker(
-                        state = MarkerState(position = routePoint.last()),
-                        title = "unknows",
-                        snippet = "Address Not Available"
-                    )
-                }
-                if (currentRoute.isNotEmpty()) {
-                    Marker(
-                        state = MarkerState(position = currentRoute.first()),
-                        title = "unknows",
-                        snippet = "Address Not Available"
-                    )
-                    var devide: Int = currentRoute.size / 10
-                    repeat(8) {
-                        if (it == 4) {
-                            Log.d("debug","fuck")
-//                            cameraPositionState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(viewModel.mapView, 10f) }
-                        }
-                        Marker(
-                            state = MarkerState(position = currentRoute[devide]),
-                            title = "unknows",
-                            snippet = "Address Not Available"
-                        )
-                        devide += currentRoute.size / 10
-
+        if (!directionsResult.routes.isNullOrEmpty()) {
+            directionsResult.routes.forEach { route ->
+                route.legs.forEach { leg ->
+                    val legPoints = mutableListOf<LatLng>()
+                    leg.steps.forEach { step ->
+                        val points = step.polyline.decodePath()
+                        legPoints.addAll(points.map { LatLng(it.lat, it.lng) })
                     }
-                    Polyline(
-                        points = currentRoute,
-                        color = Color.Blue,
-                        width = 20f,
-                        onClick = { /* Handle polyline click event if needed */ }
-                    )
-                    Marker(
-                        state = MarkerState(position = currentRoute.last()),
-                        title = "unknows",
-                        snippet = "Address Not Available"
-                    )
+                    if (legPoints.isNotEmpty()) {
+                        Marker(
+                            state = MarkerState(position = legPoints.first()),
+                            title = route.legs.first().startAddress,
+                            snippet = route.legs.first().startAddress
+                        )
+                        if (currentLegPoints.isNotEmpty() && findNearByyPoints) {
+                            viewModel.currentRoutePoints += legPoints.first()
+                            var devide: Int = currentLegPoints.size / 10
+                            repeat(8) {
+                                Log.d("debug", "SS${it}")
+                                viewModel.currentRoutePoints += currentLegPoints[devide]
+                                devide += currentLegPoints.size / 10
+                            }
+                            viewModel.currentRoutePoints += legPoints.last()
+                            findNearByyPoints = false
+                        }
+                        Polyline(
+                            points = legPoints,
+                            color = if ( legPoints == currentLegPoints ) Color.Blue else Color.Red,
+                            width = 20f,
+                            clickable = true,
+                            onClick = {
+                                viewModel.currentRoute = route
+                                findNearByyPoints = true
+                                currentLegPoints = legPoints
+                            }
+                        )
+                        Marker(
+                            state = MarkerState(position = legPoints.last()),
+                            title = route.legs.first().endAddress,
+                            snippet = route.legs.first().endAddress
+                        )
+                    }
                 }
             }
         }
-        if (nearByPlacesAlongRoute.isNotEmpty()) {
-            nearByPlacesAlongRoute.forEach { place ->
+        if (viewModel.nearByPlacesAlongRoute.isNotEmpty()) {
+            viewModel.nearByPlacesAlongRoute.forEach { place ->
+                Log.d("debug", "hiii")
                 Marker(
                     state = MarkerState(position = LatLng(place.position.lat, place.position.lng)),
                     title = place.title,

@@ -36,6 +36,7 @@ import com.example.placesalongtheroute.ui.theme.screens.UIComposable.GoogleMapVi
 import com.example.placesalongtheroute.ui.theme.screens.UIComposable.MyOutlinedTextField
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.model.DirectionsResult
+import com.google.maps.model.DirectionsRoute
 import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,13 +44,12 @@ import kotlinx.coroutines.Dispatchers
 fun HomeScreen(navController: NavController, viewModel: ViewModel) {
     var origin by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
-    var currentRoute by remember { mutableStateOf(emptyList<LatLng>()) }
 
     if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.findDirection) {
         LaunchedEffect(Unit) {
             if (viewModel.findDirection == true) {
-                viewModel.allRoutes = emptyList()
-                viewModel.currentRoute = emptyList()
+                viewModel.currentRoutePoints = emptyList()
+                viewModel.currentRoute = DirectionsRoute()
                 viewModel.directionsResult = DirectionsResult()
                 viewModel.placeType = ""
                 viewModel.nearByPlaces = emptyList()
@@ -57,35 +57,19 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                 viewModel.findAlongTheRoute = false
                 viewModel.currentLocation = LatLng(20.5937, 78.9629)
                 viewModel.mapView = LatLng(20.5937, 78.9629)
-            }
-            viewModel.directionsResult = fetchDirection(origin, destination, viewModel)
-            if (viewModel.directionsResult.routes.isNotEmpty()) {
-                viewModel.directionsResult.routes.forEach { route ->
-                    val routePoints = mutableListOf<List<LatLng>>()
-                    route.legs.forEach { leg ->
-                        val legPoints = mutableListOf<LatLng>()
-                        leg.steps.forEach { step ->
-                            val points = step.polyline.decodePath()
-                            legPoints.addAll(points.map { LatLng(it.lat, it.lng) })
-                        }
-                        routePoints.add(legPoints)
-                    }
-
-                    viewModel.allRoutes += routePoints
-                }
-                if (viewModel.allRoutes.isNotEmpty()) {
-                    viewModel.currentRoute = viewModel.allRoutes[0]
-                    currentRoute = viewModel.currentRoute
-                }
+                viewModel.directionsResult = fetchDirection(origin, destination, viewModel)
             }
             viewModel.findDirection = false
         }
     }
 
-    if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty() && viewModel.findAlongTheRoute) {
+    if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty() && viewModel.findAlongTheRoute) {
         LaunchedEffect(Dispatchers.IO) {
-            currentRoute.forEach { point ->
-                viewModel.nearByPlacesAlongRoute = viewModel.nearByPlacesAlongRoute + fetchNearbyPlacesFromHere(point, viewModel)
+            viewModel.nearByPlacesAlongRoute = emptyList()
+            if (viewModel.nearByPlacesAlongRoute.isEmpty()) {
+                viewModel.currentRoutePoints.forEach { point ->
+                    viewModel.nearByPlacesAlongRoute += fetchNearbyPlacesFromHere(point, viewModel)
+                }
             }
             viewModel.findAlongTheRoute = false
         }
@@ -112,13 +96,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             item {
                 Spacer(Modifier.width(10.dp))
                 ElevatedButton(
-                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
+                    onClick = { if (viewModel.currentRoutePoints.isNotEmpty()) {
                         viewModel.placeType = "Restaurant"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Food")
                 }
@@ -126,13 +110,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
+                    onClick = { if (viewModel.currentRoutePoints.isNotEmpty()) {
                         viewModel.placeType = "Fuel"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Fuel")
                 }
@@ -140,13 +124,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
+                    onClick = { if (viewModel.currentRoutePoints.isNotEmpty()) {
                         viewModel.placeType = "Tourism"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Tourism")
                 }
@@ -154,13 +138,13 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
             item {
                 ElevatedButton(
-                    onClick = { if (viewModel.currentRoute.isNotEmpty()) {
+                    onClick = { if (viewModel.currentRoutePoints.isNotEmpty()) {
                         viewModel.placeType = "Service"
                         viewModel.findAlongTheRoute = true
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoute.isNotEmpty()
+                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Service")
                 }

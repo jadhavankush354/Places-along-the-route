@@ -87,4 +87,10 @@ dependencies {
     // Coroutine support for Retrofit
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("io.reactivex.rxjava3:rxjava:3.1.1")
+
+    implementation ("com.google.firebase:firebase-appcheck-safetynet:16.1.2")
+
+    // Runtime
+    implementation ("androidx.work:work-runtime:2.9.0")
+
 }

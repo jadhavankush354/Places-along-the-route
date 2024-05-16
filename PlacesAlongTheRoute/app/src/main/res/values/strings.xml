@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">PlacesAlongTheRoute</string>
     <string name="google_maps_api_key">AIzaSyCVyhKQPBTVEzW-TCetVeOVsJvbCTUSlz4</string> <!--Ranjit-->
-    <string name="here_api_key">uqP0OH5y37uA-Cq-hCoY_t9k_-CCXEn5a5kSsIGuhwI</string>
+    <string name="here_api_key">RM9jouGWeiONrGoBLfHY7jkPNpIDq-N6xZNj9CIblCM</string>
     <string name="tom_tom_key">oVpKzM0jnWoCDvhArQWAdwGPzKZKgdF2</string>
 </resources>

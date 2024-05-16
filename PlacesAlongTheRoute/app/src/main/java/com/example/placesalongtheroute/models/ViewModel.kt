@@ -9,11 +9,12 @@ import com.example.placesalongtheroute.entityClasses.herenearby.Item
 import com.example.placesalongtheroute.entityClasses.nearbyplaces.Place
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.model.DirectionsResult
+import com.google.maps.model.DirectionsRoute
 
 class ViewModel(): ViewModel() {
     private lateinit var context: MainActivity
-    var allRoutes by mutableStateOf<List<List<LatLng>>>(emptyList())
-    var currentRoute by mutableStateOf<List<LatLng>>(emptyList())
+    var currentRoutePoints by mutableStateOf<List<LatLng>>(emptyList())
+    var currentRoute by mutableStateOf(DirectionsRoute())
     var directionsResult by mutableStateOf(DirectionsResult())
     var findDirection by mutableStateOf(false)
     var placeType by mutableStateOf("")
