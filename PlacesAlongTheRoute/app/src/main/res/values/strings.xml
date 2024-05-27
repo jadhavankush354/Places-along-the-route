@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PlacesAlongTheRoute</string>
+    <string name="app_name">The Fearless Rider</string>
     <string name="google_maps_api_key">AIzaSyCVyhKQPBTVEzW-TCetVeOVsJvbCTUSlz4</string> <!--Ranjit-->
     <string name="here_api_key">RM9jouGWeiONrGoBLfHY7jkPNpIDq-N6xZNj9CIblCM</string>
     <string name="tom_tom_key">oVpKzM0jnWoCDvhArQWAdwGPzKZKgdF2</string>

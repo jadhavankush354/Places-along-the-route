@@ -1,26 +1,18 @@
 package com.example.placesalongtheroute.functions
 
 import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
+import com.example.placesalongtheroute.models.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
 
+
 lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-@Composable
-fun getCurrentLocation(context: Context): LatLng {
-    var currentLocation by remember { mutableStateOf(LatLng(20.5937, 78.9629)) }
+fun getCurrentLocation(context: Activity, viewModel: ViewModel) {
     fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     if (ActivityCompat.checkSelfPermission(
             context,
@@ -31,22 +23,18 @@ fun getCurrentLocation(context: Context): LatLng {
         ) != PackageManager.PERMISSION_GRANTED
     ) {
         ActivityCompat.requestPermissions(
-            context as Activity,
+            context,
             arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
             100
         )
     }
 
     fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-        Log.d("debug", "in method ${it != null}")
-        currentLocation = if (it != null) {
-            Toast.makeText(context, "Success", Toast.LENGTH_SHORT). show()
-            LatLng(it.latitude, it.longitude)
+        if (it != null) {
+            viewModel.currentLocation = LatLng(it.latitude, it.longitude)
+            viewModel.setOrigin("My location")
         } else {
-            Toast.makeText(context, "Failed try again", Toast.LENGTH_SHORT). show()
-            LatLng(12.970019, 77.730677)
-//            LatLng(20.5937, 78.9629)
+            viewModel.currentLocation = LatLng(0.0, 0.0)
         }
     }
-    return currentLocation
 }

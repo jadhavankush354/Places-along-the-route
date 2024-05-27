@@ -1,6 +1,5 @@
 package com.example.placesalongtheroute.service
 
-import android.content.Context
 import android.util.Log
 import com.example.placesalongtheroute.R
 import com.example.placesalongtheroute.entityClasses.nearbyplaces.NearByPlaces
@@ -23,7 +22,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 suspend fun fetchNearbyPlaces(place: LatLng, viewModel: ViewModel): List<Place> {
-    val apiKey = viewModel.getContext().getString(R.string.google_maps_api_key)
+    val apiKey = viewModel.context.getString(R.string.google_maps_api_key)
     val fieldMask = "*"
     val contentType = "application/json"
 
@@ -53,7 +52,7 @@ suspend fun fetchNearbyPlaces(place: LatLng, viewModel: ViewModel): List<Place> 
 }
 
  suspend fun fetchDirection(origin: String, destination: String, viewModel: ViewModel): DirectionsResult {
-    val apiKey = viewModel.getContext().getString(R.string.google_maps_api_key)
+    val apiKey = viewModel.context.getString(R.string.google_maps_api_key)
     val googleMapApiService = GoogleMapApiService.getInstance()
     var allRoutePoints : DirectionsResult = DirectionsResult()
     try {

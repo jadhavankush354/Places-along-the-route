@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,6 +46,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/LICENSE.md"
         }
     }
 }
@@ -67,6 +70,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    // Firebase
+    implementation ("com.google.firebase:firebase-appcheck-safetynet:16.1.2")
+    implementation("com.google.firebase:firebase-firestore:25.0.0")
+    implementation("com.google.firebase:firebase-storage-ktx:21.0.0")
+
     // Navigation
     implementation ("androidx.navigation:navigation-compose:2.7.7")
 
@@ -88,9 +96,14 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("io.reactivex.rxjava3:rxjava:3.1.1")
 
-    implementation ("com.google.firebase:firebase-appcheck-safetynet:16.1.2")
-
     // Runtime
     implementation ("androidx.work:work-runtime:2.9.0")
+    implementation ("androidx.compose.ui:ui:1.6.7")
+    implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation ("androidx.compose.ui:ui-tooling:1.6.7")
+    implementation ("androidx.compose.compiler:compiler:1.5.14")
+    implementation ("androidx.compose.material:material:1.6.7")
 
+    //Mail sender
+    implementation("com.sun.mail:android-mail:1.6.7")
 }

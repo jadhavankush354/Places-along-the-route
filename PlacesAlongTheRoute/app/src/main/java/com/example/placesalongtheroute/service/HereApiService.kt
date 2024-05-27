@@ -12,7 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 suspend fun fetchNearbyPlacesFromHere(place: LatLng, viewModel: ViewModel): List<Item> {
-    val apiKey = viewModel.getContext().getString(R.string.here_api_key)
+    val apiKey = viewModel.context.getString(R.string.here_api_key)
     val at = "${place.latitude},${place.longitude}"
 
     val hereApiService = HereApiService.getInstance()

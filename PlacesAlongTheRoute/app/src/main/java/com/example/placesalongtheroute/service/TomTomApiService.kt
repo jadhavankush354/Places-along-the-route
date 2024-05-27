@@ -1,6 +1,5 @@
 package com.example.placesalongtheroute.service
 
-import android.content.Context
 import com.example.placesalongtheroute.R
 import com.example.placesalongtheroute.entityClasses.tomtomplacesalongroute.TomTomPlacesAlongRoute
 import com.example.placesalongtheroute.models.ViewModel
@@ -20,7 +19,7 @@ import retrofit2.http.Query
 
 
 suspend fun fetchPlacesAlongRoot(points: List<LatLng>, viewModel: ViewModel): List<LatLng> {
-    val apiKey = viewModel.getContext().getString(R.string.tom_tom_key)
+    val apiKey = viewModel.context.getString(R.string.tom_tom_key)
     val maxDetourTime = 2000
     val limit = 20
 
