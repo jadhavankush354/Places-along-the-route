@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,9 +33,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.placesalongtheroute.R
 import com.example.placesalongtheroute.models.ViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: ViewModel) {
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.user.searchLimit = viewModel.userRepository.getSearchLimit(viewModel.user.userId)
+            delay(100)
+        }
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(title = {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.Start) {
@@ -63,7 +71,9 @@ fun ProfileScreen(navController: NavController, viewModel: ViewModel) {
                 modifier = Modifier.padding(10.dp)
             )
 
-            Column(modifier = Modifier.fillMaxWidth().padding(start = 40.dp)) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 40.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
@@ -111,7 +121,7 @@ fun ProfileScreen(navController: NavController, viewModel: ViewModel) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Pending near by search limit : ${viewModel.user.searchLimit - 101}",
+                        text = "Pending near by search limit : ${ 101 - viewModel.user.searchLimit }",
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontFamily = FontFamily.SansSerif,

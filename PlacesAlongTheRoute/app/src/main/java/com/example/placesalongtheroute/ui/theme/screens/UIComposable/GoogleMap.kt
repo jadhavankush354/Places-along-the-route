@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
@@ -60,14 +61,10 @@ fun GoogleMapView(viewModel: ViewModel) {
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(isMyLocationEnabled = true)
     ) {
         if (currentLocation != LatLng(0.0, 0.0)) {
-            Log.d("debug","currentLocation != LatLng(0.0, 0.0) ${currentLocation}")
-            Marker(
-                state = MarkerState(position = currentLocation),
-                title = "Current Location",
-            )
             if (nearByPlaces.isNotEmpty()) {
                 nearByPlaces.forEach { place ->
                     Marker(

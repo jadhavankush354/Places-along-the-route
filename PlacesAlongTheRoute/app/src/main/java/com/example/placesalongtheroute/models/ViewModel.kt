@@ -95,38 +95,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         logInStatus = sharedPreferences.getBoolean(isLoggedInKey, false)
         email = sharedPreferences.getString(emailKey, "") ?: ""
         password = sharedPreferences.getString(passwordKey, "") ?: ""
-
-//        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application)
-
         ViewModelHolder.viewModel = this
     }
-//    fun getCurrentLocation(activity: Activity) {
-//        if (ActivityCompat.checkSelfPermission(
-//                activity,
-//                android.Manifest.permission.ACCESS_FINE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                activity,
-//                android.Manifest.permission.ACCESS_COARSE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            ActivityCompat.requestPermissions(
-//                activity,
-//                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-//                100
-//            )
-//            return
-//        }
-//
-//        viewModelScope.launch {
-//            fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-//                if (it != null) {
-//                    Toast.makeText(activity, "Success", Toast.LENGTH_SHORT).show()
-//                    currentLocation = LatLng(it.latitude, it.longitude)
-//                } else {
-//                    Toast.makeText(activity, "Failed try again", Toast.LENGTH_SHORT).show()
-//                    currentLocation = LatLng(0.0, 0.0)
-//                }
-//            }
-//        }
-//    }
 }

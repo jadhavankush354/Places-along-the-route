@@ -1,7 +1,5 @@
 package com.example.placesalongtheroute.ui.theme.screens
 
-import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +18,6 @@ import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -38,12 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.placesalongtheroute.R
-import com.example.placesalongtheroute.functions.getCurrentLocation
 import com.example.placesalongtheroute.models.ViewModel
 import com.example.placesalongtheroute.service.fetchDirection
 import com.example.placesalongtheroute.service.fetchNearbyPlacesFromHere
@@ -53,8 +48,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.model.DirectionsResult
 import com.google.maps.model.DirectionsRoute
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,9 +56,6 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
     val origin by viewModel.origin.collectAsState()
     val destination by viewModel.destination.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
-    var fetchCurrentLocation by remember { mutableStateOf(false) }
-    val activity = LocalContext.current as? Activity ?: return
-
     if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.findDirection) {
         LaunchedEffect(Unit) {
             if (viewModel.findDirection) {
@@ -76,9 +66,19 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                 viewModel.nearByPlaces = emptyList()
                 viewModel.nearByPlacesAlongRoute = emptyList()
                 viewModel.findAlongTheRoute = false
-                viewModel.currentLocation = LatLng(0.0, 0.0)
+//                viewModel.currentLocation = LatLng(0.0, 0.0)
                 viewModel.mapView = LatLng(20.5937, 78.9629)
+                if (origin == "Current Location" && destination == "Current Location"){
+                    viewModel.directionsResult = fetchDirection("${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", "${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", viewModel)
+                }
+                else if (destination == "Current Location") {
+                    viewModel.directionsResult = fetchDirection(origin, "${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", viewModel)
+                }
+                else if (origin == "Current Location") {
+                    viewModel.directionsResult = fetchDirection("${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", destination, viewModel)
+                } else {
                     viewModel.directionsResult = fetchDirection(origin, destination, viewModel)
+                }
                 viewModel.userRepository.addSearchHistory(viewModel.user.userId, origin, destination)
             }
             viewModel.findDirection = false
@@ -165,22 +165,19 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
             }
         }, modifier = Modifier.fillMaxWidth())
 
-
-
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            if (fetchCurrentLocation) {
-                viewModel.setOrigin("")
-                viewModel.setDestination("")
-                LaunchedEffect(key1 = Unit) {
-                    startLocationUpdates(activity, viewModel)
-                }
-            }
-            viewModel.setOrigin(MyOutlinedTextField(placeholder = "From", Icons.Default.AddLocationAlt, modifier = Modifier.padding(8.dp)))
-            Icon(imageVector = Icons.Default.MyLocation, contentDescription = null, modifier =  Modifier.clickable { fetchCurrentLocation = true })
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
+            viewModel.setOrigin(MyOutlinedTextField(placeholder = "From",
+                leadingIcon = Icons.Default.AddLocationAlt, modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp), defaultValue = "Current Location"))
+            viewModel.setDestination(MyOutlinedTextField(placeholder = "To",
+                leadingIcon = Icons.Default.AddLocationAlt, modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp), defaultValue = "Current Location"))
         }
 
-        viewModel.setDestination(MyOutlinedTextField(placeholder = "To", Icons.Default.AddLocationAlt, modifier = Modifier.padding(8.dp)))
         ElevatedButton(onClick = { if (origin.isNotEmpty() && destination.isNotEmpty()) { viewModel.findDirection = true } },
             modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
@@ -249,15 +246,5 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
         }
 
         GoogleMapView(viewModel)
-    }
-}
-
-suspend fun startLocationUpdates(activity: Activity, viewModel: ViewModel) {
-    withContext(Dispatchers.IO) {
-        while (true) {
-            getCurrentLocation(activity, viewModel)
-            Log.d("debug" , "Fetched : ${viewModel.currentLocation}")
-            delay(500) // Delay for 5 seconds
-        }
     }
 }

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: ImageVector = Icons.Default.Search, modifier: Modifier = Modifier.fillMaxWidth().padding(8.dp), ): String {
+fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: ImageVector = Icons.Default.Search, modifier: Modifier = Modifier.fillMaxWidth().padding(8.dp), defaultValue: String = ""): String {
     val iconToKeyboardType = mapOf(
         Icons.Default.MailOutline to KeyboardType.Email,
         Icons.Default.Password to KeyboardType.Password,
@@ -56,7 +56,8 @@ fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: Image
         leadingIcon = {
             Icon(
                 imageVector = leadingIcon,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.clickable { if (defaultValue.isNotEmpty()) state = defaultValue  }
             )
         },
         trailingIcon = {
