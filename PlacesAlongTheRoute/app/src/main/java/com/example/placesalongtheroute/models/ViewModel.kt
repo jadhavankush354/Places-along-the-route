@@ -31,7 +31,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var findAlongTheRoute by mutableStateOf(false)
     var currentLocation by mutableStateOf(LatLng(0.0, 0.0))
     var mapView by mutableStateOf(LatLng(20.5937, 78.9629))
-//    private val fusedLocationProviderClient: FusedLocationProviderClient
 
     var users by mutableStateOf<List<User>>(emptyList())
     var user by mutableStateOf(User())

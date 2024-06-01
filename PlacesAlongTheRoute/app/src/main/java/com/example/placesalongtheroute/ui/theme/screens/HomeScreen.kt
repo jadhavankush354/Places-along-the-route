@@ -1,6 +1,8 @@
 package com.example.placesalongtheroute.ui.theme.screens
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,11 +51,15 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.model.DirectionsResult
 import com.google.maps.model.DirectionsRoute
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: ViewModel) {
     viewModel.login()
+    val scope = rememberCoroutineScope()
     val origin by viewModel.origin.collectAsState()
     val destination by viewModel.destination.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
@@ -66,7 +73,6 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                 viewModel.nearByPlaces = emptyList()
                 viewModel.nearByPlacesAlongRoute = emptyList()
                 viewModel.findAlongTheRoute = false
-//                viewModel.currentLocation = LatLng(0.0, 0.0)
                 viewModel.mapView = LatLng(20.5937, 78.9629)
                 if (origin == "Current Location" && destination == "Current Location"){
                     viewModel.directionsResult = fetchDirection("${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", "${viewModel.currentLocation.latitude},${viewModel.currentLocation.longitude}", viewModel)
@@ -87,6 +93,7 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
 
     if (origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty() && viewModel.findAlongTheRoute) {
         LaunchedEffect(Dispatchers.IO) {
+
             viewModel.nearByPlacesAlongRoute = emptyList()
             if (viewModel.nearByPlacesAlongRoute.isEmpty()) {
                 if (viewModel.userRepository.getSearchLimit(viewModel.user.userId) <= 100) {
@@ -195,7 +202,7 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
+                    enabled = viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Food")
                 }
@@ -209,7 +216,7 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
+                    enabled = viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Fuel")
                 }
@@ -223,7 +230,7 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
+                    enabled = viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Tourism")
                 }
@@ -237,7 +244,7 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
                     } },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 0.dp),
-                    enabled = origin.isNotEmpty() && destination.isNotEmpty() && viewModel.currentRoutePoints.isNotEmpty()
+                    enabled = viewModel.currentRoutePoints.isNotEmpty()
                 ) {
                     Text(text = "Service")
                 }
@@ -246,5 +253,14 @@ fun HomeScreen(navController: NavController, viewModel: ViewModel) {
         }
 
         GoogleMapView(viewModel)
+    }
+    // Scheduling the reset operation once a day
+    LaunchedEffect(Unit) {
+        scope.launch {
+            while (true) {
+                val result = viewModel.userRepository.resetSearchLimit(viewModel.user.userId)
+                delay(24 * 60 * 60 * 1000L)  // Delay for 24 hours
+            }
+        }
     }
 }

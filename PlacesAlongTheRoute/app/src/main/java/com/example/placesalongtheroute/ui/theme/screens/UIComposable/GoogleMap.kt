@@ -1,6 +1,5 @@
 package com.example.placesalongtheroute.ui.theme.screens.UIComposable
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +56,6 @@ fun GoogleMapView(viewModel: ViewModel) {
 
             delay(100)
         }
-        Log.d("debug","currentLocation = viewModel.currentLocation ${currentLocation}")
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
@@ -113,8 +111,10 @@ fun GoogleMapView(viewModel: ViewModel) {
                             clickable = true,
                             onClick = {
                                 viewModel.currentRoute = route
-                                findNearByyPoints = true
+                                viewModel.nearByPlacesAlongRoute = emptyList()
+                                viewModel.currentRoutePoints = emptyList()
                                 currentLegPoints = legPoints
+                                findNearByyPoints = true
                             }
                         )
 

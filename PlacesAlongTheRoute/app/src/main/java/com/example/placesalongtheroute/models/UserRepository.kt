@@ -1,11 +1,16 @@
 package com.example.placesalongtheroute.models
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.placesalongtheroute.entityClasses.User
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.ZoneId
 
 class UserRepository {
 
@@ -16,7 +21,13 @@ class UserRepository {
     suspend fun createUser(user: User): String {
         try {
             val usersCollectionRef = firestore.collection("Users")
-            val newUser = hashMapOf("name" to user.name, "email" to user.email, "password" to user.password, "mobileNumber" to user.mobileNumber, "searchLimit" to 0)
+            val newUser = hashMapOf(
+                "name" to user.name,
+                "email" to user.email,
+                "password" to user.password,
+                "mobileNumber" to user.mobileNumber,
+                "searchLimit" to 0,
+                "lastResetDate" to Timestamp.now())
             val documentReference = usersCollectionRef.add(newUser).await()
             return documentReference.id
         } catch (e: Exception) {
@@ -34,7 +45,8 @@ class UserRepository {
                 "email" to user.email,
                 "password" to password,
                 "mobileNumber" to user.mobileNumber,
-                "searchLimit" to user.searchLimit
+                "searchLimit" to user.searchLimit,
+                "lastResetDate" to user.lastResetDate
             )
 
             documentReference.set(updatedData, SetOptions.merge()).await()
@@ -84,6 +96,7 @@ class UserRepository {
             throw e
         }
     }
+
     suspend fun getSearchLimit(userId: String): Long {
         try {
             val documentReference = firestore.collection("Users").document(userId)
@@ -94,17 +107,36 @@ class UserRepository {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun resetSearchLimit(userId: String): String {
-        try {
-            val usersCollectionRef = firestore.collection("Users")
-            val documentReference = usersCollectionRef.document(userId)
+        val usersCollectionRef = firestore.collection("Users")
+        val documentReference = usersCollectionRef.document(userId)
+        return try {
+            val userDocument = documentReference.get().await()
 
-            val updatedData = hashMapOf(
-                "searchLimit" to 0
-            )
+            if (userDocument.exists()) {
+                val lastResetTimestamp = try {
+                    userDocument.getTimestamp("lastResetDate")
+                } catch (e: Exception) {
+                    null
+                }
 
-            documentReference.set(updatedData, SetOptions.merge()).await()
-            return "Search limit reset successfully"
+                val lastResetDate = lastResetTimestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                val today = LocalDate.now()
+
+                if (lastResetDate == null || lastResetDate.isBefore(today)) {
+                    val updatedData = hashMapOf(
+                        "searchLimit" to 0,
+                        "lastResetDate" to Timestamp.now()
+                    )
+                    documentReference.set(updatedData, SetOptions.merge()).await()
+                    "Search limit reset successfully"
+                } else {
+                    "Search limit reset is not required"
+                }
+            } else {
+                "User not found"
+            }
         } catch (e: Exception) {
             throw e
         }

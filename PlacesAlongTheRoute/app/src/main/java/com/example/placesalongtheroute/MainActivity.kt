@@ -4,12 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -164,11 +167,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Greeting(viewModel: ViewModel) {
     NavController(viewModel)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -178,6 +183,7 @@ fun GreetingPreview() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavController(viewModel: ViewModel) {
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -190,7 +196,7 @@ fun NavController(viewModel: ViewModel) {
             isLoggedIn = viewModel.getLoggedUserStatus()
             email = viewModel.getLoggedUserEmail()
             password = viewModel.getLoggedUserPassword()
-            delay(1000)
+            delay(100)
         }
     }
 
@@ -225,3 +231,5 @@ fun NavController(viewModel: ViewModel) {
         }
     }
 }
+
+

@@ -1,6 +1,7 @@
 package com.example.placesalongtheroute.ui.theme.screens.UIComposable
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,6 +19,8 @@ import androidx.compose.material.icons.filled.PlaylistAddCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -31,10 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: ImageVector = Icons.Default.Search, modifier: Modifier = Modifier.fillMaxWidth().padding(8.dp), defaultValue: String = ""): String {
+fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: ImageVector = Icons.Default.Search, modifier: Modifier = Modifier
+    .fillMaxWidth()
+    .padding(8.dp), defaultValue: String = ""): String {
     val iconToKeyboardType = mapOf(
         Icons.Default.MailOutline to KeyboardType.Email,
         Icons.Default.Password to KeyboardType.Password,
@@ -51,22 +58,44 @@ fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: Image
     )
 
     val keyboardType = iconToKeyboardType.getOrElse(leadingIcon) { KeyboardType.Text }
-    var state by remember { mutableStateOf("") }
+    var state by remember { mutableStateOf(if (defaultValue.isNotEmpty() && defaultValue != "Current Location") defaultValue else "") }
+
+    var passwordVisible by remember { mutableStateOf(true) }
+    val visualTransformation = if (keyboardType == KeyboardType.Password && passwordVisible) PasswordVisualTransformation() else VisualTransformation.None
     OutlinedTextField(
         leadingIcon = {
-            Icon(
-                imageVector = leadingIcon,
-                contentDescription = null,
-                modifier = Modifier.clickable { if (defaultValue.isNotEmpty()) state = defaultValue  }
-            )
+            if (keyboardType == KeyboardType.Password) {
+                if (state.isNotEmpty()) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { passwordVisible = !passwordVisible }
+                    )
+                } else {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { if (defaultValue.isNotEmpty()) state = defaultValue  }
+                    )
+                }
+            } else {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { if (defaultValue.isNotEmpty()) state = defaultValue  }
+                )
+            }
+
         },
         trailingIcon = {
-            if (state.isNotEmpty()) {
-                Icon(
-                imageVector = Icons.Default.Cancel,
-                contentDescription = null,
-                modifier = Modifier.clickable { state = "" }
-            )
+            Row {
+                if (state.isNotEmpty()) {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { state = "" }
+                    )
+                }
             }
         },
         value = state,
@@ -76,6 +105,7 @@ fun MyOutlinedTextField(placeholder: String = "Please enter", leadingIcon: Image
             imeAction = ImeAction.Done
         ),
         singleLine = true,
+        visualTransformation = visualTransformation,
         label = { Text(text = placeholder) },
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge
